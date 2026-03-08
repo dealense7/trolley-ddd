@@ -20,8 +20,8 @@ CREATE TABLE products (
 
     active BOOLEAN DEFAULT 1,
 
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_products_normalized ON products(normalized_name);

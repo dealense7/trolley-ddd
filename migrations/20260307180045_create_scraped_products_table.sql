@@ -43,8 +43,8 @@ CREATE TABLE scraped_products (
     -- Raw JSON data (full scraper output)
     raw_data TEXT,
 
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (branch_id) REFERENCES store_branches(id) ON DELETE CASCADE,
     FOREIGN KEY (matched_product_id) REFERENCES products(id) ON DELETE SET NULL

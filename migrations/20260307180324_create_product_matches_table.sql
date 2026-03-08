@@ -20,7 +20,7 @@ CREATE TABLE product_matches (
     created_by TEXT,  -- 'auto', 'admin_user_id', 'ml_model_v1'
     verified_at DATETIME,
 
-    created_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (scraped_product_id) REFERENCES scraped_products(id) ON DELETE CASCADE,
     FOREIGN KEY (canonical_product_id) REFERENCES products(id) ON DELETE CASCADE

@@ -9,8 +9,8 @@ CREATE TABLE stores (
     primary_color TEXT,                 -- Brand color for UI
     active BOOLEAN DEFAULT 1,
     scraper_config TEXT,                -- JSON config for scraper
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_stores_slug ON stores(slug);

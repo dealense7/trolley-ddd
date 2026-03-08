@@ -12,7 +12,7 @@ CREATE TABLE product_translations (
     -- Normalized version for matching
     normalized_name TEXT NOT NULL,
 
-    created_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     UNIQUE(product_id, language_code)

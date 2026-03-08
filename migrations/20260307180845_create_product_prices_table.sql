@@ -15,7 +15,7 @@ CREATE TABLE product_prices (
     original_amount REAL,
     discount_percentage REAL,
 
-    created_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (canonical_product_id) REFERENCES products(id) ON DELETE CASCADE,
     FOREIGN KEY (scraped_product_id) REFERENCES scraped_products(id) ON DELETE CASCADE,

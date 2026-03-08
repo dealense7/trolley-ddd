@@ -9,8 +9,8 @@ CREATE TABLE countries (
     currency_symbol TEXT NOT NULL,  -- ₾, $, €, etc.
     timezone TEXT NOT NULL,         -- Europe/Tbilisi
     active BOOLEAN DEFAULT 1,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_countries_code ON countries(code);

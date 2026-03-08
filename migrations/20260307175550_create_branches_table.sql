@@ -11,7 +11,8 @@ CREATE TABLE store_branches (
     longitude REAL,
     opening_hours TEXT,
     active BOOLEAN DEFAULT 1,
-    created_at DATETIME NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
     FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT

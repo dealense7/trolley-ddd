@@ -11,7 +11,7 @@ CREATE TABLE product_identifiers (
     -- Confidence in this identifier
     confidence REAL DEFAULT 1.0,
 
-    created_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     UNIQUE(type, value)  -- Each identifier can only map to one product

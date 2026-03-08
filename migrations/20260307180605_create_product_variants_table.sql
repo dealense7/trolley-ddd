@@ -11,7 +11,8 @@ CREATE TABLE product_variants (
     -- Variant details
     variant_value TEXT,  -- e.g., "2L" for size variant
 
-    created_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (parent_product_id) REFERENCES products(id) ON DELETE CASCADE,
     FOREIGN KEY (variant_product_id) REFERENCES products(id) ON DELETE CASCADE,
