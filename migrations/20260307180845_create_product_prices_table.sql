@@ -9,7 +9,7 @@ CREATE TABLE product_prices (
 
     -- Price information
     amount REAL NOT NULL,
-    currency TEXT NOT NULL,
+    currency VARCHAR(10) NOT NULL,
     amount_in_base_currency REAL,
 
     original_amount REAL,
@@ -26,8 +26,13 @@ CREATE TABLE product_prices (
         (canonical_product_id IS NULL AND scraped_product_id IS NOT NULL)
         )
 );
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 CREATE INDEX idx_product_prices_canonical ON product_prices(canonical_product_id);
+-- +goose StatementEnd
+
+-- +goose StatementBegin
 CREATE INDEX idx_product_prices_scraped ON product_prices(scraped_product_id);
 -- +goose StatementEnd
 

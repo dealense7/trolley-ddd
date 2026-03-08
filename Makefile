@@ -5,7 +5,14 @@ BINARY_NAME=go-rates
 MAIN_PATH=./cmd/api
 BUILD_DIR=./bin
 MIGRATIONS_DIR=./migrations
-DB_PATH=./data/go-rates.db
+
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
+# Construct MySQL DSN
+DB_DSN := $(DB_USER):$(DB_PASSWORD)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?parseTime=true&charset=utf8mb4&loc=Local
 
 # Colors for output
 GREEN=\033[0;32m
@@ -53,20 +60,18 @@ bench:
 
 ## migrate: Run database migrations
 migrate:
-	@echo '${GREEN}Running database migrations...${NC}'
-	@mkdir -p ./data
-	@goose -dir $(MIGRATIONS_DIR) sqlite3 $(DB_PATH) up
-	@echo '${GREEN}Migrations completed${NC}'
+	@echo "Running migrations on $$DB_DRIVER..."
+	@goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_DSN)" up
 
 ## migrate-down: Rollback last migration
 migrate-down:
 	@echo '${YELLOW}Rolling back last migration...${NC}'
-	@goose -dir $(MIGRATIONS_DIR) sqlite3 $(DB_PATH) down
+	@goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_DSN)" down
 	@echo '${GREEN}Rollback completed${NC}'
 
 ## migrate-status: Check migration status
 migrate-status:
-	@goose -dir $(MIGRATIONS_DIR) sqlite3 $(DB_PATH) status
+	@goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_DSN)" status
 
 ## migrate-create: Create new migration (usage: make migrate-create NAME=migration_name)
 migrate-create:

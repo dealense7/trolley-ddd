@@ -21,11 +21,19 @@ CREATE TABLE products (
     active BOOLEAN DEFAULT 1,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+-- +goose StatementEnd
 
-CREATE INDEX idx_products_normalized ON products(normalized_name);
-CREATE INDEX idx_products_brand ON products(brand);
+-- +goose StatementBegin
+CREATE INDEX idx_products_normalized ON products(normalized_name(255));
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE INDEX idx_products_brand ON products(brand(255));
+-- +goose StatementEnd
+
+-- +goose StatementBegin
 CREATE INDEX idx_products_active ON products(active);
 -- +goose StatementEnd
 
