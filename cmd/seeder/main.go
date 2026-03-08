@@ -10,26 +10,40 @@ import (
 	"go.uber.org/fx"
 )
 
+type SeedersParams struct {
+	fx.In
+
+	LoggerFactory logger.Factory
+	Seeders       []seed.Seeder `group:"seeders"`
+}
+
 func main() {
-	fx.New(
-		// General Staff
+	app := fx.New(
 		fx.Provide(
 			cfg.NewConfig,
 			logger.NewFactory,
 			mysql.NewDB,
+			mysql.ProvideRepositories,
+			fx.Annotate(
+				func(repos mysql.ReposContainer) seed.Seeder { return &seed.CountrySeeder{Repo: repos.CountryRepo} },
+				fx.ResultTags(`group:"seeders"`),
+			),
 		),
 
-		fx.Invoke(seedData),
-		fx.Invoke(func(shutdown fx.Shutdowner) {
-			_ = shutdown.Shutdown()
-		}),
-	).Run()
+		fx.Invoke(runAllSeeders),
+		fx.Invoke(func(shutdown fx.Shutdowner) { _ = shutdown.Shutdown() }),
+	)
+
+	app.Run()
 }
 
-func seedData(db *mysql.DB, loggerFactory logger.Factory) {
-	log := loggerFactory.For(logger.General)
+func runAllSeeders(p SeedersParams) {
+	log := p.LoggerFactory.For(logger.General)
 	log.Info("Seeding data started")
-	ctx := context.Background()
 
-	seed.Run(ctx, db.DB, log)
+	for _, s := range p.Seeders {
+		s.Run(context.Background(), log)
+	}
+
+	log.Info("Seeding data finished")
 }
