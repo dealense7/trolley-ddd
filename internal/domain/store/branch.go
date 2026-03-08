@@ -1,6 +1,10 @@
 package store
 
-import "time"
+import (
+	"time"
+
+	"github.com/dealense7/go-rates-ddd/internal/domain/country"
+)
 
 type ParseProvider string
 
@@ -19,13 +23,14 @@ type Branch struct {
 
 	City          string  `db:"city"`
 	ScraperConfig *string `db:"scraper_config"`
+	Active        bool    `db:"active"`
 
-	Active bool `db:"active"`
+	Country *country.Country
 
 	CreatedAt time.Time `db:"created_at"`
 }
 
-func NewBranch(countryId int64, parseUrl, city string, provider ParseProvider, config *string) *Branch {
+func NewBranch(countryId int64, parseUrl, city, config string, provider ParseProvider) *Branch {
 	now := time.Now()
 	return &Branch{
 		CountryId:     countryId,
@@ -33,7 +38,7 @@ func NewBranch(countryId int64, parseUrl, city string, provider ParseProvider, c
 		ParseProvider: provider,
 		City:          city,
 		Active:        true,
-		ScraperConfig: config,
+		ScraperConfig: &config,
 		CreatedAt:     now,
 	}
 }

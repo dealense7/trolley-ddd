@@ -16,6 +16,7 @@ type ModuleName string
 
 const (
 	General ModuleName = "general"
+	Scraper ModuleName = "scraper"
 )
 
 type Factory interface {

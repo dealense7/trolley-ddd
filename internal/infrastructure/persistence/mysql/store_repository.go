@@ -42,6 +42,19 @@ func (r *StoreRepository) Insert(ctx context.Context, c *store.Store) (*int64, e
 	return &id, nil
 }
 
+func (r *StoreRepository) GetAllBranches(ctx context.Context) ([]store.Branch, error) {
+	var items []store.Branch
+
+	query := "SELECT * FROM store_branches"
+
+	err := r.db.SelectContext(ctx, &items, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
 func (r *StoreRepository) AddBranch(ctx context.Context, storeId int64, b *store.Branch) error {
 	query := `
 		INSERT IGNORE INTO store_branches (store_id, country_id, parse_url, parse_provider, city, scraper_config)

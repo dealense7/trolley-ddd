@@ -14,6 +14,8 @@ ENV Reader            - joho/godotenv
 Server                - go-chi/chi
 Template              - a-h/templ
 Hot Reload            - air-verse/air
+HTTP                  - gocolly/colly
+Json                  - tidwall/gjson
 
 # Front End
 CSS - tailwindlabs/tailwindcss

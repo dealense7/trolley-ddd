@@ -91,6 +91,9 @@ seed:
 	@echo '${GREEN}Seeding database...${NC}'
 	@go run cmd/seeder/main.go
 
+parse:
+	@go run cmd/scraper/main.go
+
 ## templ: Generate templ files
 templ:
 	@echo '${GREEN}Generating templ files...${NC}'

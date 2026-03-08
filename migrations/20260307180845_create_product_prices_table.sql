@@ -8,7 +8,7 @@ CREATE TABLE product_prices (
     scraped_product_id BIGINT,    -- Link to scraped product (which links to canonical)
 
     -- Price information
-    amount REAL NOT NULL,
+    amount BIGINT NOT NULL,
     currency VARCHAR(10) NOT NULL,
     amount_in_base_currency REAL,
 

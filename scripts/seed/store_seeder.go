@@ -23,22 +23,22 @@ func (s *StoreSeeder) Run(ctx context.Context, log *zap.Logger) {
 			getCountryId("Italy", countries),
 			"https://glovoapp.com/en/it/milano/stores/carrefour-milano",
 			"Milano",
+			`{"glovo-location-city-code":"MIL","glovo-location-country-code""IT"}`,
 			store.ParseProviderGlovo,
-			nil,
 		),
 		*store.NewBranch(
 			getCountryId("Spain", countries),
 			"https://glovoapp.com/en/es/madrid/stores/carrefour-madrid",
 			"Madrid",
+			`{"glovo-location-city-code":"MAD","glovo-location-country-code":"ES"}`,
 			store.ParseProviderGlovo,
-			nil,
 		),
 		*store.NewBranch(
 			getCountryId("Georgia", countries),
 			"https://glovoapp.com/en/ge/tbilisi/stores/1carrefour-tbi",
 			"Tbilisi",
+			`{"glovo-location-city-code":"TBL","glovo-location-country-code":"GE"}`,
 			store.ParseProviderGlovo,
-			nil,
 		),
 	}
 
