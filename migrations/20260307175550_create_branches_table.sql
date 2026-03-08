@@ -7,15 +7,15 @@ CREATE TABLE store_branches (
     parse_url VARCHAR(255),
     parse_provider VARCHAR(255),
     city VARCHAR(255) NOT NULL,
-    latitude REAL,
-    longitude REAL,
-    opening_hours VARCHAR(255),
+    scraper_config TEXT,
     active BOOLEAN DEFAULT 1,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
-    FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT
+    FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT,
+
+    UNIQUE KEY uk_store_branch (store_id, country_id, city)
 );
 -- +goose StatementEnd
 
@@ -29,10 +29,6 @@ CREATE INDEX idx_store_branches_store ON store_branches(store_id);
 
 -- +goose StatementBegin
 CREATE INDEX idx_store_branches_city ON store_branches(city(255));
--- +goose StatementEnd
-
--- +goose StatementBegin
-CREATE INDEX idx_store_branches_coords ON store_branches(latitude, longitude);
 -- +goose StatementEnd
 
 -- +goose Down

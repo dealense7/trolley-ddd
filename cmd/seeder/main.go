@@ -28,6 +28,12 @@ func main() {
 				func(repos mysql.ReposContainer) seed.Seeder { return &seed.CountrySeeder{Repo: repos.CountryRepo} },
 				fx.ResultTags(`group:"seeders"`),
 			),
+			fx.Annotate(
+				func(repos mysql.ReposContainer) seed.Seeder {
+					return &seed.StoreSeeder{CountryRepo: repos.CountryRepo, Repo: repos.StoreRepo}
+				},
+				fx.ResultTags(`group:"seeders"`),
+			),
 		),
 
 		fx.Invoke(runAllSeeders),
