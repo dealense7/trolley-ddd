@@ -63,6 +63,10 @@ migrate:
 	@echo "Running migrations on $$DB_DRIVER..."
 	@goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_DSN)" up
 
+seed:
+	@echo "Running Seeder"
+	@go run cmd/seeder/main.go
+
 ## migrate-down: Rollback last migration
 migrate-down:
 	@echo '${YELLOW}Rolling back last migration...${NC}'
@@ -85,8 +89,7 @@ migrate-create:
 ## seed: Seed database with sample data
 seed:
 	@echo '${GREEN}Seeding database...${NC}'
-	@go run scripts/seed/main.go
-	@echo '${GREEN}Database seeded${NC}'
+	@go run cmd/seeder/main.go
 
 ## templ: Generate templ files
 templ:

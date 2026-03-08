@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE stores (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     name_local VARCHAR(255),                    -- Georgian name: კარფური
     slug VARCHAR(255) NOT NULL UNIQUE,          -- URL-friendly: carrefour-ge

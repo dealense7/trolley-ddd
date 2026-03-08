@@ -7,6 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func SeedData(ctx context.Context, db *sqlx.DB, log *zap.Logger) {
+func Run(ctx context.Context, db *sqlx.DB, log *zap.Logger) {
 	seedCountries(ctx, db, log)
 }

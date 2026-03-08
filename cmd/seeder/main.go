@@ -7,7 +7,6 @@ import (
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
 	"github.com/dealense7/go-rates-ddd/internal/infrastructure/persistence/mysql"
 	"github.com/dealense7/go-rates-ddd/scripts/seed"
-	"github.com/jmoiron/sqlx"
 	"go.uber.org/fx"
 )
 
@@ -27,10 +26,10 @@ func main() {
 	).Run()
 }
 
-func seedData(db *sqlx.DB, loggerFactory logger.Factory) {
+func seedData(db *mysql.DB, loggerFactory logger.Factory) {
 	log := loggerFactory.For(logger.General)
 	log.Info("Seeding data started")
 	ctx := context.Background()
 
-	seed.SeedData(ctx, db, log)
+	seed.Run(ctx, db.DB, log)
 }

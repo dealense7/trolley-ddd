@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE store_branches (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     store_id BIGINT NOT NULL,
     country_id BIGINT NOT NULL,
     parse_url VARCHAR(255),

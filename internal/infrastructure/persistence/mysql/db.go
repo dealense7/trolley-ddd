@@ -6,16 +6,18 @@ import (
 	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/common/cfg"
+	"github.com/dealense7/go-rates-ddd/internal/common/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 type DB struct {
 	*sqlx.DB
 }
 
-func NewDB(cfg *cfg.Config, logger *zap.Logger) (*DB, error) {
+func NewDB(cfg *cfg.Config, loggerFactory logger.Factory) (*DB, error) {
+
+	log := loggerFactory.For(logger.General)
 
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&loc=Local",
@@ -41,7 +43,7 @@ func NewDB(cfg *cfg.Config, logger *zap.Logger) (*DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	logger.Info("database connection established")
+	log.Info("database connection established")
 
 	return &DB{DB: db}, nil
 }

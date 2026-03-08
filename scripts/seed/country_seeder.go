@@ -2,7 +2,6 @@ package seed
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/domain/country"
@@ -18,15 +17,18 @@ func seedCountries(ctx context.Context, db *sqlx.DB, log *zap.Logger) {
 	}
 
 	query := `
-	INSERT INTO countries (code, name, name_local, currency_code, currency_symbol, timezone) 
-	VALUES (:code, :name, :name_local, :currency_code, :currency_symbol, :timezone )
-	ON CONFLICT (code) DO NOTHING;
+		INSERT INTO countries (code, name, name_local, currency_code, currency_symbol, timezone)
+		VALUES (:code, :name, :name_local, :currency_code, :currency_symbol, :timezone)
+		ON DUPLICATE KEY UPDATE code = code;
 	`
 
 	log.Info("Start | Seeding Countries")
 	startTime := time.Now()
 	for _, item := range items {
-		db.NamedExecContext(ctx, query, item)
+		_, err := db.NamedExecContext(ctx, query, item)
+		if err != nil {
+			log.Error(err.Error())
+		}
 	}
 	duration := time.Since(startTime).Milliseconds()
 	log.Info("End | Seeding Countries /s", zap.Int64("duration_ms", duration))

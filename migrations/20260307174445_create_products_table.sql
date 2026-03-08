@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE products (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
 
     canonical_name TEXT NOT NULL,   -- Primary name (usually English)
     normalized_name TEXT NOT NULL,  -- Normalized name for matching (lowercase, no special chars)

@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE countries (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     code VARCHAR(3) NOT NULL UNIQUE,      -- ISO 3166-1 alpha-2 (GE, US, UK, etc.)
     name TEXT NOT NULL,
     name_local TEXT,                -- Local language name

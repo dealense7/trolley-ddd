@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE product_variants (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     parent_product_id BIGINT NOT NULL,  -- The "master" product
     variant_product_id BIGINT NOT NULL,  -- The variant
 

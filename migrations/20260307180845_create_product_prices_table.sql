@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE product_prices (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
 
     -- Link to product (one or the other)
     canonical_product_id BIGINT,  -- Direct link to canonical product

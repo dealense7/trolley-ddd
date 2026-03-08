@@ -1,1 +1,40 @@
+# .gitignore
+*_templ.go
+
+# Go
+/bin/
+/obj/
+*.exe
+
+# Go modules
+/go.sum
+
+# IDEs
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+
+# Node / frontend
+/node_modules
+/tmp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+
+/internal/web/static/*
+/logs/*
 .env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/

@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE product_translations (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
     language_code VARCHAR(3) NOT NULL,  -- ISO 639-1: en, ka, ru, de, fr, etc.
 
