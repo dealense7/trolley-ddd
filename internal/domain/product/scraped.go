@@ -55,17 +55,19 @@ type Scraped struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func NewScraped(branchId int64, rawName, image string) *Scraped {
+func NewScraped(externalId string, branchId int64, rawName, rawDescription, image string) *Scraped {
 	now := time.Now()
 	return &Scraped{
-		BranchID:     branchId,
-		RawName:      rawName,
-		ImageURL:     image,
-		MatchState:   MatchStatusPending,
-		ScrapedAt:    now,
-		ScrapedCount: 1,
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		ExternalID:     externalId,
+		BranchID:       branchId,
+		RawName:        rawName,
+		RawDescription: rawDescription,
+		ImageURL:       image,
+		MatchState:     MatchStatusPending,
+		ScrapedAt:      now,
+		ScrapedCount:   1,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 }
 

@@ -56,7 +56,7 @@ func startParsing(s *scraper.ParserService, p SeedersParams, repos mysql.ReposCo
 		if b.Active == false {
 			continue
 		}
-		err = s.ScrapeAndPrint(b)
+		err = s.ScrapeAndPrint(ctx, repos.ProductRepo, b)
 		if err != nil {
 			log.Error("Failed to scrape data", zap.Error(err))
 		}

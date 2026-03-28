@@ -10,7 +10,7 @@ CREATE TABLE scraped_products (
 
     -- Raw product data (as-is from scraper)
     raw_name VARCHAR(255) NOT NULL,
-    raw_description VARCHAR(255),
+    raw_description MEDIUMTEXT,
 
     -- Identifiers found during scraping
     barcode VARCHAR(255),

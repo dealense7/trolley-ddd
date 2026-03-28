@@ -9,6 +9,7 @@ import (
 type ScrapedProduct struct {
 	ExternalID     string
 	Name           string
+	Description    string
 	NormalizedName *string
 	Price          int64
 	OldPrice       int64

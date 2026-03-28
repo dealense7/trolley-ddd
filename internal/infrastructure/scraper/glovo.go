@@ -230,12 +230,13 @@ func (s *GlovoStrategy) extractProducts(items *[]scraper.ScrapedProduct, element
 		originalPrice := int64(data.Get("price").Float() * 100)
 
 		product := scraper.ScrapedProduct{
-			ExternalID: data.Get("externalId").String(),
-			Name:       data.Get("name").String(),
-			Price:      currentPrice,
-			OldPrice:   originalPrice,
-			ImageURL:   imageURL,
-			ScrapedAt:  time.Now(),
+			ExternalID:  data.Get("id").String(),
+			Name:        data.Get("name").String(),
+			Description: data.Get("description").String(),
+			Price:       currentPrice,
+			OldPrice:    originalPrice,
+			ImageURL:    imageURL,
+			ScrapedAt:   time.Now(),
 		}
 
 		*items = append(*items, product)

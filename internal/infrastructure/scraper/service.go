@@ -1,8 +1,8 @@
 package scraper
 
 import (
+	"context"
 	"fmt"
-	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
 	"github.com/dealense7/go-rates-ddd/internal/domain/product"
@@ -28,7 +28,7 @@ func (s *ParserService) AddStrategy(st scraper.Strategy) {
 }
 
 // ScrapeAndPrint just logs the data, no saving
-func (s *ParserService) ScrapeAndPrint(target store.Branch) error {
+func (s *ParserService) ScrapeAndPrint(context context.Context, repo product.Repository, target store.Branch) error {
 	var str scraper.Strategy
 	for _, st := range s.strategies {
 		if st.CanParse(target.ParseProvider) {
@@ -46,12 +46,20 @@ func (s *ParserService) ScrapeAndPrint(target store.Branch) error {
 	}
 
 	for _, p := range *products {
-		ExternalID     string
-		Price          int64
-		OldPrice       int64
-		ScrapedAt      time.Time
-		scraped := product.NewScraped(target.ID, p.Name, p.ImageURL)
-		price := product.newP
+		//ExternalID     string
+		//Price          int64
+		//OldPrice       int64
+		//ScrapedAt      time.Time
+		scraped := product.NewScraped(p.ExternalID, target.ID, p.Name, p.Description, p.ImageURL)
+
+		id, err := repo.InsertOrUpdate(context, scraped)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("ID %v \n", id)
+		//product.s
+		//price := product.NewPrice()
 	}
 
 	s.log.Info("--- END BATCH ---", zap.Int("total_items", len(*products)))
