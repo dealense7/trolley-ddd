@@ -12,7 +12,7 @@ type ScrapedProduct struct {
 	Description    string
 	NormalizedName *string
 	Price          int64
-	OldPrice       int64
+	OriginalPrice  int64
 	ImageURL       string
 	ScrapedAt      time.Time
 }

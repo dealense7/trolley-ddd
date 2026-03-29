@@ -12,7 +12,7 @@ CREATE TABLE product_prices (
     currency VARCHAR(10) NOT NULL,
     amount_in_base_currency REAL,
 
-    original_amount REAL,
+    original_amount BIGINT,
     discount_percentage REAL,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

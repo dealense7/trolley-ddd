@@ -8,10 +8,12 @@ import (
 )
 
 type Config struct {
-	Env    string
-	DB     DBConfig
-	Server ServerConfig
-	Logger LoggerConfig
+	Env              string
+	DB               DBConfig
+	Server           ServerConfig
+	Logger           LoggerConfig
+	ElasticsearchURL string
+	EmbedderURL      string
 }
 
 type DBConfig struct {
@@ -48,6 +50,8 @@ func NewConfig() (*Config, error) {
 			Password: os.Getenv("DB_PASSWORD"),
 			Name:     os.Getenv("DB_NAME"),
 		},
+		ElasticsearchURL: os.Getenv("ELASTICSEARCH_URL"),
+		EmbedderURL:      os.Getenv("EMBEDDER_URL"),
 		Server: ServerConfig{
 			Port: os.Getenv("SERVER_PORT"),
 		},

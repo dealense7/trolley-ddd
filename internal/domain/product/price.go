@@ -16,17 +16,18 @@ type Price struct {
 	Currency             country.CurrencyCode `db:"currency"`
 	AmountInBaseCurrency string               `db:"amount_in_base_currency"`
 
-	OriginalAmount       string `db:"original_amount"`
+	OriginalAmount       int64  `db:"original_amount"`
 	DiscountedPercentage string `db:"discounted_percentage"`
 
 	CreatedAt time.Time `db:"created_at"`
 }
 
-func NewPrice(productId, amount int64, currency country.CurrencyCode) *Price {
+func NewPrice(productId, amount, originalAmount int64, currency country.CurrencyCode) *Price {
 	now := time.Now()
 	return &Price{
 		ScrapedProductId: productId,
 		Amount:           amount,
+		OriginalAmount:   originalAmount,
 		Currency:         currency,
 		CreatedAt:        now,
 	}

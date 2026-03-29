@@ -1,0 +1,7 @@
+node_modules/
+logs/
+*.log
+product-matcher/
+.git/
+pnpm-lock.yaml
+package.json

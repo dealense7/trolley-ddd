@@ -46,10 +46,6 @@ func (s *ParserService) ScrapeAndPrint(context context.Context, repo product.Rep
 	}
 
 	for _, p := range *products {
-		//ExternalID     string
-		//Price          int64
-		//OldPrice       int64
-		//ScrapedAt      time.Time
 		scraped := product.NewScraped(p.ExternalID, target.ID, p.Name, p.Description, p.ImageURL)
 
 		id, err := repo.InsertOrUpdate(context, scraped)
@@ -57,9 +53,7 @@ func (s *ParserService) ScrapeAndPrint(context context.Context, repo product.Rep
 			return err
 		}
 
-		fmt.Printf("ID %v \n", id)
-		//product.s
-		//price := product.NewPrice()
+		product.NewPrice(*id, p.Price, p.OriginalPrice, target.Country.CurrencyCode)
 	}
 
 	s.log.Info("--- END BATCH ---", zap.Int("total_items", len(*products)))

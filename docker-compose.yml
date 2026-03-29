@@ -1,0 +1,113 @@
+services:
+
+  # Mysql
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: products
+      MYSQL_USER: app
+      MYSQL_PASSWORD: secret
+    mem_limit: 512m
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "app", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Elasticsearch ─────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m   # adjust per VPS RAM (see table below) |  For a 2GB VPS use: -Xms256m -Xmx256m | For a 4GB VPS use: -Xms512m -Xmx512m |For a 8GB VPS use: -Xms1g -Xmx1g
+    mem_limit: 1g
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # Embedding service (image + text)
+  embedder:
+    build:
+      context: ./embed-service
+      # Remove no_cache: true — only use it manually when you need to bust cache:
+      # docker compose build --no-cache embedder
+    container_name: embedder
+    mem_limit: 3g
+    ports:
+      - "8001:8001"
+    # No volume mount here — model is baked into the image at /app/model-store
+    # Mounting a volume would shadow and destroy the baked model
+    environment:
+      - SENTENCE_TRANSFORMERS_HOME=/app/model-store
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s  # Model is already baked in, so startup is fast now
+
+  # Go scraper
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: scraper          # use the scraper stage from multi-stage build
+    container_name: scraper
+    mem_limit: 256m
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      embedder:
+        condition: service_healthy
+    environment:
+      # These override whatever is in your config.go / .env
+      # Use the service NAME (not localhost) — containers talk by name
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: products
+      DB_USER: app
+      DB_PASSWORD: secret
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      EMBEDDER_URL: http://embedder:8001
+    restart: unless-stopped   # auto-restart if it crashes
+
+  # Go seeder (one-off, not always running)
+  seeder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seeder
+    container_name: seeder
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: products
+      DB_USER: app
+      DB_PASSWORD: secret
+    profiles:
+      - tools    # won't start with "docker compose up" — run manually (see below)
+
+volumes:
+  mysql_data:
+  es_data:
