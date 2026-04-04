@@ -20,6 +20,7 @@ func (c *Client) CreateIndex(ctx context.Context) error {
 					"similarity": "cosine", // cosine similarity for normalized vectors
 				},
 				"product_id": map[string]any{"type": "keyword"},
+				"branch_id":  map[string]any{"type": "keyword"},
 			},
 		},
 		"settings": map[string]any{
@@ -54,6 +55,7 @@ func (c *Client) IndexProduct(ctx context.Context, p Product) error {
 		bytes.NewReader(body),
 		c.es.Index.WithContext(ctx),
 		c.es.Index.WithDocumentID(p.ProductID), // upsert by product ID
+		c.es.Index.WithOpType("create"),        // fail if doc already exists
 		c.es.Index.WithRefresh("false"),        // async refresh (faster bulk indexing)
 	)
 	if err != nil {

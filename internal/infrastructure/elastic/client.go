@@ -28,5 +28,6 @@ func New(cfg *cfg.Config) (*Client, error) {
 
 type Product struct {
 	ProductID string    `json:"product_id"`
+	BranchId  string    `json:"branch_id"`
 	Embedding []float64 `json:"embedding"`
 }
