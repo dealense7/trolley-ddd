@@ -1,6 +1,9 @@
 package product
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Image struct {
 	ID int64
@@ -13,5 +16,8 @@ type Image struct {
 	Folder    string `db:"folder"`
 
 	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+}
+
+func (i *Image) ImageURL() string {
+	return fmt.Sprintf("%s/%s.%s", i.Folder, i.Name, i.Extension)
 }

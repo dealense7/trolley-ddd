@@ -66,3 +66,18 @@ func (r *ProductRepository) AttachImageToProduct(ctx context.Context, i product.
 
 	return nil
 }
+
+func (r *ProductRepository) InsertPrice(ctx context.Context, p product.Price) error {
+
+	query := `INSERT INTO product_prices
+    				(scraped_product_id, amount, currency, original_amount, created_at) 
+				 VALUES (:scraped_product_id, :amount, :currency, :original_amount, :created_at)
+				 `
+
+	_, err := r.db.NamedExecContext(ctx, query, p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

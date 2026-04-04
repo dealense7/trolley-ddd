@@ -37,7 +37,7 @@ func (s *StoreSeeder) Run(ctx context.Context, log *zap.Logger) {
 			getCountryId("Georgia", countries),
 			"https://glovoapp.com/en/ge/tbilisi/stores/1carrefour-tbi",
 			"Tbilisi",
-			`{"glovo-location-city-code":"TBL","glovo-location-country-code":"GE"}`,
+			`{"glovo-location-city-code":"TBI","glovo-location-country-code":"GE"}`,
 			store.ParseProviderGlovo,
 		),
 	}

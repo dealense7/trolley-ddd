@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
@@ -40,12 +41,12 @@ func (s *GlovoStrategy) Parse(target store.Branch) (*[]scraper.ScrapedProduct, e
 	items := make([]scraper.ScrapedProduct, 0)
 
 	// Get all category links from the page
-	links := []string{"/v4/stores/52935/addresses/326622/content/main?nodeType=DEEP_LINK&link=ortofrutta-sc.11498287/verdura-fresca-c.11497954\\"}
-	//links, err := s.extractCategoryLinks(target.ParseUrl)
-	//if err != nil {
-	//	s.log.Error("Failed to extract category links", zap.Error(err))
-	//	return nil, err
-	//}
+	//links := []string{"/v4/stores/52935/addresses/326622/content/main?nodeType=DEEP_LINK&link=ortofrutta-sc.11498287/verdura-fresca-c.11497954\\"}
+	links, err := s.extractCategoryLinks(target.ParseUrl)
+	if err != nil {
+		s.log.Error("Failed to extract category links", zap.Error(err))
+		return nil, err
+	}
 
 	if len(links) == 0 {
 		s.log.Warn("No category links found", zap.String("url", target.ParseUrl))
@@ -54,16 +55,29 @@ func (s *GlovoStrategy) Parse(target store.Branch) (*[]scraper.ScrapedProduct, e
 
 	s.log.Info("Found category links", zap.Int("count", len(links)))
 
+	maxWaitGroup := 4
+
+	var wg sync.WaitGroup
+	guard := make(chan struct{}, maxWaitGroup)
+
 	// Fetch products from each category
 	for _, link := range links {
-		if err := s.fetchProducts(&items, link, target); err != nil {
-			s.log.Error("Failed to fetch products",
-				zap.String("link", link),
-				zap.Error(err),
-			)
-			continue // Continue with other categories even if one fails
-		}
+		wg.Add(1)
+		go func(link string) {
+			guard <- struct{}{}
+			if err := s.fetchProducts(&items, link, target); err != nil {
+				s.log.Error("Failed to fetch products",
+					zap.String("link", link),
+					zap.Error(err),
+				)
+			}
+
+			<-guard
+			wg.Done()
+		}(link)
 	}
+
+	wg.Wait()
 
 	return &items, nil
 }
@@ -216,6 +230,7 @@ func (s *GlovoStrategy) parseProducts(items *[]scraper.ScrapedProduct, body []by
 
 // extractProducts converts API elements to ScrapedProduct
 func (s *GlovoStrategy) extractProducts(items *[]scraper.ScrapedProduct, elements []gjson.Result) {
+	s.log.Info("Elements Count", zap.Int("count", len(elements)))
 	for _, elem := range elements {
 		data := elem.Get("data")
 
