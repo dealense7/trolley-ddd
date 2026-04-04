@@ -48,12 +48,26 @@ func (s *ParserService) ScrapeAndPrint(context context.Context, repo product.Rep
 	for _, p := range *products {
 		scraped := product.NewScraped(p.ExternalID, target.ID, p.Name, p.Description, p.ImageURL)
 
-		id, err := repo.InsertOrUpdate(context, scraped)
+		id, created, err := repo.InsertOrUpdate(context, scraped)
 		if err != nil {
 			return err
 		}
 
 		product.NewPrice(*id, p.Price, p.OriginalPrice, target.Country.CurrencyCode)
+
+		if created {
+			image, err := s.downloadImage(*id, p.ImageURL)
+			if err != nil {
+				s.log.Error("--- Image Not Downloaded ---", zap.Error(err))
+				return err
+			}
+
+			err = repo.AttachImageToProduct(context, *image)
+			if err != nil {
+				s.log.Error("--- Image not attached ---", zap.Error(err))
+				return err
+			}
+		}
 	}
 
 	s.log.Info("--- END BATCH ---", zap.Int("total_items", len(*products)))

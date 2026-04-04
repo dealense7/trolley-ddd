@@ -16,6 +16,7 @@
 /.phpunit.cache
 /.vscode
 /.zed
+/static
 
 # Node / frontend
 /node_modules

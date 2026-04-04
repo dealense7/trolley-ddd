@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 
+	"github.com/dealense7/go-rates-ddd/internal/domain/country"
 	"github.com/dealense7/go-rates-ddd/internal/domain/store"
 	"github.com/jmoiron/sqlx"
 )
@@ -41,15 +42,39 @@ func (r *StoreRepository) Insert(ctx context.Context, c *store.Store) (*int64, e
 
 	return &id, nil
 }
-
 func (r *StoreRepository) GetAllBranches(ctx context.Context) ([]store.Branch, error) {
-	var items []store.Branch
+	var rows []struct {
+		store.Branch
+		CountryID   int64  `db:"country_id"`
+		CountryName string `db:"country_name"`
+		CountryCode string `db:"country_code"`
+	}
 
-	query := "SELECT * FROM store_branches"
+	query := `
+		SELECT 
+			sb.*,
+			c.id   AS country_id,
+			c.name AS country_name,
+			c.code AS country_code
+		FROM store_branches sb
+		JOIN countries c ON c.id = sb.country_id
+	`
 
-	err := r.db.SelectContext(ctx, &items, query)
+	err := r.db.SelectContext(ctx, &rows, query)
 	if err != nil {
 		return nil, err
+	}
+
+	// attach country
+	items := make([]store.Branch, 0, len(rows))
+	for _, r := range rows {
+		branch := r.Branch
+		branch.Country = &country.Country{
+			ID:   r.CountryID,
+			Name: r.CountryName,
+			Code: r.CountryCode,
+		}
+		items = append(items, branch)
 	}
 
 	return items, nil
