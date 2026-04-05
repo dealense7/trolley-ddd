@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
 	"github.com/dealense7/go-rates-ddd/internal/domain/product"
 	"github.com/dealense7/go-rates-ddd/internal/domain/scraper"
 	"github.com/dealense7/go-rates-ddd/internal/domain/store"
-	"github.com/dealense7/go-rates-ddd/internal/infrastructure/elastic"
-	"github.com/dealense7/go-rates-ddd/internal/infrastructure/embedder"
 	"go.uber.org/zap"
 )
 
@@ -35,11 +34,7 @@ func (s *ParserService) ScrapeAndPrint(
 	context context.Context,
 	repo product.Repository,
 	target store.Branch,
-	embederClient *embedder.Client,
-	elClient *elastic.Client,
 ) error {
-	_ = elClient.CreateIndex(context)
-
 	var str scraper.Strategy
 	for _, st := range s.strategies {
 		if st.CanParse(target.ParseProvider) {
@@ -61,6 +56,7 @@ func (s *ParserService) ScrapeAndPrint(
 	// Create a buffered channel to act as a semaphore
 	guard := make(chan struct{}, maxGoroutines)
 
+	priceTime := time.Now()
 	for _, p := range *products {
 		wg.Add(1)
 		go func(p scraper.ScrapedProduct) {
@@ -72,7 +68,7 @@ func (s *ParserService) ScrapeAndPrint(
 				s.log.Error("Error inserting product", zap.Error(err))
 			}
 
-			price := product.NewPrice(*id, p.Price, p.OriginalPrice, target.Country.CurrencyCode)
+			price := product.NewPrice(*id, p.Price, p.OriginalPrice, target.Country.CurrencyCode, priceTime)
 
 			if created {
 				image, err := s.downloadImage(*id, p.ImageURL)
@@ -80,29 +76,6 @@ func (s *ParserService) ScrapeAndPrint(
 					s.log.Error("--- Image Not Downloaded ---", zap.Error(err))
 				}
 
-				//	embeddings, err := embederClient.EmbedFused(image.ImageURL(), p.Name)
-				//	if err != nil {
-				//		s.log.Error("--- EmbedFused ---", zap.Error(err))
-				//		return err
-				//	}
-				//
-				//	elasticProduct := elastic.Product{ProductID: fmt.Sprintf("%d", id), Embedding: embeddings}
-				//
-				//	err = elClient.IndexProduct(context, elasticProduct)
-				//	if err != nil {
-				//		s.log.Error("--- Elastic Index ---", zap.Error(err))
-				//		return err
-				//	}
-				//
-				//	matches, _ := elClient.FindSimilar(context, embeddings, 3, 0.92)
-				//	if len(matches) > 0 {
-				//		match := matches[0]
-				//		s.log.Info("duplicate found",
-				//			zap.Int64p("id", id),
-				//			zap.String("match_id", match.ProductID),
-				//			zap.Float64("score", match.Score))
-				//	}
-				//
 				if err == nil {
 					err = repo.AttachImageToProduct(context, *image)
 					if err != nil {

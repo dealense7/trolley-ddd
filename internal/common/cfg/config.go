@@ -38,7 +38,9 @@ type LoggerConfig struct {
 }
 
 func NewConfig() (*Config, error) {
-	_ = godotenv.Load(".env")
+	if os.Getenv("DB_HOST") == "" {
+		_ = godotenv.Load(".env")
+	}
 
 	cfg := &Config{
 		Env: os.Getenv("ENV"),

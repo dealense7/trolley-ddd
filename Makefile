@@ -6,13 +6,16 @@ MAIN_PATH=./cmd/api
 BUILD_DIR=./bin
 MIGRATIONS_DIR=./migrations
 
+# Only load .env if not running in Docker
+ifndef DOCKER
 ifneq (,$(wildcard .env))
     include .env
     export
 endif
+endif
 
-# Construct MySQL DSN
-DB_DSN := $(DB_USER):$(DB_PASSWORD)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?parseTime=true&charset=utf8mb4&loc=Local
+# Construct MySQL DSN (lazy evaluation with = not :=)
+DB_DSN = $(DB_USER):$(DB_PASSWORD)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?parseTime=true&charset=utf8mb4&loc=Local
 
 # Colors for output
 GREEN=\033[0;32m
@@ -60,12 +63,8 @@ bench:
 
 ## migrate: Run database migrations
 migrate:
-	@echo "Running migrations on $$DB_DRIVER..."
+	@echo "Running migrations on $(DB_DRIVER)..."
 	@goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_DSN)" up
-
-seed:
-	@echo "Running Seeder"
-	@go run cmd/seeder/main.go
 
 ## migrate-down: Rollback last migration
 migrate-down:
@@ -91,6 +90,7 @@ seed:
 	@echo '${GREEN}Seeding database...${NC}'
 	@go run cmd/seeder/main.go
 
+## parse: Run scraper
 parse:
 	@go run cmd/scraper/main.go
 

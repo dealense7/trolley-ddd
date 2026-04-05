@@ -1,6 +1,6 @@
 services:
 
-  # Mysql
+  # ── MySQL ─────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -29,7 +29,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m   # adjust per VPS RAM (see table below) |  For a 2GB VPS use: -Xms256m -Xmx256m | For a 4GB VPS use: -Xms512m -Xmx512m |For a 8GB VPS use: -Xms1g -Xmx1g
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     mem_limit: 1g
     ports:
       - "9200:9200"
@@ -41,18 +41,14 @@ services:
       timeout: 10s
       retries: 10
 
-  # Embedding service (image + text)
+  # ── Embedder ──────────────────────────────────────────────────
   embedder:
     build:
       context: ./embed-service
-      # Remove no_cache: true — only use it manually when you need to bust cache:
-      # docker compose build --no-cache embedder
     container_name: embedder
     mem_limit: 3g
     ports:
       - "8001:8001"
-    # No volume mount here — model is baked into the image at /app/model-store
-    # Mounting a volume would shadow and destroy the baked model
     environment:
       - SENTENCE_TRANSFORMERS_HOME=/app/model-store
     healthcheck:
@@ -60,16 +56,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 20
-      start_period: 120s  # Model is already baked in, so startup is fast now
+      start_period: 120s
 
-  # Go scraper
-  scraper:
+  # ── App ───────────────────────────────────────────────────────
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-      target: scraper          # use the scraper stage from multi-stage build
-    container_name: scraper
-    mem_limit: 256m
+      target: builder
+    container_name: app
     depends_on:
       mysql:
         condition: service_healthy
@@ -78,8 +73,8 @@ services:
       embedder:
         condition: service_healthy
     environment:
-      # These override whatever is in your config.go / .env
-      # Use the service NAME (not localhost) — containers talk by name
+      DOCKER: "true"
+      DB_DRIVER: mysql
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: products
@@ -87,26 +82,10 @@ services:
       DB_PASSWORD: secret
       ELASTICSEARCH_URL: http://elasticsearch:9200
       EMBEDDER_URL: http://embedder:8001
-    restart: unless-stopped   # auto-restart if it crashes
-
-  # Go seeder (one-off, not always running)
-  seeder:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: seeder
-    container_name: seeder
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: products
-      DB_USER: app
-      DB_PASSWORD: secret
-    profiles:
-      - tools    # won't start with "docker compose up" — run manually (see below)
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: ["tail", "-f", "/dev/null"]
 
 volumes:
   mysql_data:

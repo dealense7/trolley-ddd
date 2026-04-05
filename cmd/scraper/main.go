@@ -5,8 +5,6 @@ import (
 
 	"github.com/dealense7/go-rates-ddd/internal/common/cfg"
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
-	"github.com/dealense7/go-rates-ddd/internal/infrastructure/elastic"
-	"github.com/dealense7/go-rates-ddd/internal/infrastructure/embedder"
 	"github.com/dealense7/go-rates-ddd/internal/infrastructure/persistence/mysql"
 	"github.com/dealense7/go-rates-ddd/internal/infrastructure/scraper"
 	"go.uber.org/fx"
@@ -26,8 +24,6 @@ func main() {
 			logger.NewFactory,
 			mysql.NewDB,
 			mysql.ProvideRepositories,
-			embedder.New,
-			elastic.New,
 		),
 
 		fx.Provide(
@@ -46,7 +42,7 @@ func main() {
 	app.Run()
 }
 
-func startParsing(s *scraper.ParserService, p SeedersParams, repos mysql.ReposContainer, embClient *embedder.Client, elClient *elastic.Client) {
+func startParsing(s *scraper.ParserService, p SeedersParams, repos mysql.ReposContainer) {
 	log := p.LoggerFactory.For(logger.General)
 	log.Info("Seeding data started")
 
@@ -60,7 +56,7 @@ func startParsing(s *scraper.ParserService, p SeedersParams, repos mysql.ReposCo
 		if b.Active == false {
 			continue
 		}
-		err = s.ScrapeAndPrint(ctx, repos.ProductRepo, b, embClient, elClient)
+		err = s.ScrapeAndPrint(ctx, repos.ProductRepo, b)
 		if err != nil {
 			log.Error("Failed to scrape data", zap.Error(err))
 		}

@@ -10,10 +10,11 @@ type Image struct {
 
 	ProductId int64 `db:"product_id"`
 
-	Name      string `db:"name"`
-	Size      int64  `db:"size"`
-	Extension string `db:"extension"`
-	Folder    string `db:"folder"`
+	Name          string `db:"name"`
+	Size          int64  `db:"size"`
+	Extension     string `db:"extension"`
+	Folder        string `db:"folder"`
+	HasEmbeddings bool   `db:"has_embeddings"`
 
 	CreatedAt time.Time `db:"created_at"`
 }

@@ -22,13 +22,12 @@ type Price struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-func NewPrice(productId, amount, originalAmount int64, currency country.CurrencyCode) *Price {
-	now := time.Now()
+func NewPrice(productId, amount, originalAmount int64, currency country.CurrencyCode, priceTime time.Time) *Price {
 	return &Price{
 		ScrapedProductId: productId,
 		Amount:           amount,
 		OriginalAmount:   originalAmount,
 		Currency:         currency,
-		CreatedAt:        now,
+		CreatedAt:        priceTime,
 	}
 }
