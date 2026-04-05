@@ -45,9 +45,10 @@ func (r *StoreRepository) Insert(ctx context.Context, c *store.Store) (*int64, e
 func (r *StoreRepository) GetAllBranches(ctx context.Context) ([]store.Branch, error) {
 	var rows []struct {
 		store.Branch
-		CountryID   int64  `db:"country_id"`
-		CountryName string `db:"country_name"`
-		CountryCode string `db:"country_code"`
+		CountryID    int64                `db:"country_id"`
+		CountryName  string               `db:"country_name"`
+		CountryCode  string               `db:"country_code"`
+		CurrencyCode country.CurrencyCode `db:"currency_code"`
 	}
 
 	query := `
@@ -55,7 +56,8 @@ func (r *StoreRepository) GetAllBranches(ctx context.Context) ([]store.Branch, e
 			sb.*,
 			c.id   AS country_id,
 			c.name AS country_name,
-			c.code AS country_code
+			c.code AS country_code,
+			c.currency_code AS currency_code
 		FROM store_branches sb
 		JOIN countries c ON c.id = sb.country_id
 	`
@@ -70,9 +72,10 @@ func (r *StoreRepository) GetAllBranches(ctx context.Context) ([]store.Branch, e
 	for _, r := range rows {
 		branch := r.Branch
 		branch.Country = &country.Country{
-			ID:   r.CountryID,
-			Name: r.CountryName,
-			Code: r.CountryCode,
+			ID:           r.CountryID,
+			Name:         r.CountryName,
+			Code:         r.CountryCode,
+			CurrencyCode: r.CurrencyCode,
 		}
 		items = append(items, branch)
 	}

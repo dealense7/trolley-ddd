@@ -6,7 +6,6 @@ import (
 	"log"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/dealense7/go-rates-ddd/internal/common/cfg"
 	"github.com/dealense7/go-rates-ddd/internal/common/logger"
@@ -52,7 +51,7 @@ func runEmbeddings(db *mysql.DB, e *elastic.Client, em *embedder.Client) {
 	}
 	var items []itemStruct
 
-	query := "SELECT sp.raw_name, sp.branch_id, pi.* FROM product_images as pi join products.scraped_products sp on pi.product_id = sp.id"
+	query := "SELECT sp.raw_name, sp.branch_id, pi.* FROM product_images as pi join products.scraped_products sp on pi.product_id = sp.id where pi.has_embeddings = false"
 
 	err := db.SelectContext(ctx, &items, query)
 	if err != nil {
@@ -71,16 +70,19 @@ func runEmbeddings(db *mysql.DB, e *elastic.Client, em *embedder.Client) {
 			defer wg.Done()
 			defer func() { <-guard }()
 
-			start := time.Now()
 			embeddings, _ := em.EmbedFused(item.ImageURL(), item.RawName)
 			ed := elastic.Product{
 				ProductID: strconv.FormatInt(item.ProductId, 10),
 				BranchId:  strconv.FormatInt(item.BranchId, 10),
 				Embedding: embeddings,
 			}
-			_ = e.IndexProduct(ctx, ed)
+			err = e.IndexProduct(ctx, ed)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			query := `UPDATE product_images SET has_embeddings = true where product_id = :id`
 
-			log.Printf("product %d took %s", item.ProductId, time.Since(start))
+			db.NamedExecContext(ctx, query, map[string]interface{}{"id": item.ProductId})
 		}()
 	}
 	wg.Wait()

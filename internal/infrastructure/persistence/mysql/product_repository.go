@@ -21,7 +21,7 @@ func (r *ProductRepository) InsertOrUpdate(ctx context.Context, s *product.Scrap
 	var id int64
 	created := false
 
-	query := `SELECT id from scraped_products where branch_id = ? and external_id = ?`
+	query := `SELECT id from scraped_products where external_id = ? and external_id = ?`
 	err := r.db.GetContext(ctx, &id, query, s.BranchID, s.ExternalID)
 
 	// If no result found create new one
@@ -68,14 +68,21 @@ func (r *ProductRepository) AttachImageToProduct(ctx context.Context, i product.
 }
 
 func (r *ProductRepository) InsertPrice(ctx context.Context, p product.Price) error {
+	var id int64
 
-	query := `INSERT INTO product_prices
-    				(scraped_product_id, amount, currency, original_amount, created_at) 
-				 VALUES (:scraped_product_id, :amount, :currency, :original_amount, :created_at)
-				 `
+	query := `SELECT id from product_prices where scraped_product_id = ? and created_at = ?`
+	err := r.db.GetContext(ctx, &id, query, p.ScrapedProductId, p.CreatedAt.Format("2006-01-02 15:04:05"))
 
-	_, err := r.db.NamedExecContext(ctx, query, p)
-	if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		query := `INSERT INTO product_prices (scraped_product_id, amount, currency, original_amount, created_at) 
+					VALUES (:scraped_product_id, :amount, :currency, :original_amount, :created_at)
+					`
+
+		_, err := r.db.NamedExecContext(ctx, query, p)
+		if err != nil {
+			return err
+		}
+	} else {
 		return err
 	}
 

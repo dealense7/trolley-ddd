@@ -1,28 +1,24 @@
 FROM python:3.11-slim
 
-# Single source of truth for model location
 ENV SENTENCE_TRANSFORMERS_HOME=/app/model-store
 
 WORKDIR /app
 
-# System deps for Pillow/OpenCV
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# CPU PyTorch first — prevents pulling the 2GB GPU wheel
-RUN pip install --no-cache-dir torch torchvision \
-    --index-url https://download.pytorch.org/whl/cpu
+# CUDA torch — bundles all nvidia libs it needs
+RUN pip install --no-cache-dir torch torchvision numpy \
+    --index-url https://download.pytorch.org/whl/cu121
 
-# App dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Bake the model into the image at /app/model-store
-# Volume is NOT mounted here, so this layer survives at runtime
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('clip-ViT-B-32')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 COPY main.py .
 

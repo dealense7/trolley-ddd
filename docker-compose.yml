@@ -46,6 +46,13 @@ services:
     build:
       context: ./embed-service
     container_name: embedder
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     mem_limit: 3g
     ports:
       - "8001:8001"

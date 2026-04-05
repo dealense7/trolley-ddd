@@ -6,16 +6,49 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 type SearchResult struct {
-	ProductID string
-	Score     float64
+	ProductID  string
+	Embeddings []float64
+	Score      float64
+}
+
+func (c *Client) GetSingle(ctx context.Context, id int64) (*SearchResult, error) {
+	res, err := c.es.Get(IndexName, strconv.FormatInt(id, 10), c.es.Get.WithContext(ctx))
+
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		b, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("get: %s", b)
+	}
+
+	var raw struct {
+		Source struct {
+			ProductID string    `json:"product_id"`
+			Embedding []float64 `json:"embedding"`
+		} `json:"_source"`
+	}
+
+	if err := json.NewDecoder(res.Body).Decode(&raw); err != nil {
+		return nil, err
+	}
+
+	return &SearchResult{
+		ProductID:  raw.Source.ProductID,
+		Embeddings: raw.Source.Embedding,
+	}, nil
 }
 
 func (c *Client) FindSimilar(
 	ctx context.Context,
 	queryVector []float64,
+	branchId int64,
 	topK int,
 	threshold float64,
 ) ([]SearchResult, error) {
@@ -28,8 +61,19 @@ func (c *Client) FindSimilar(
 			"k":              topK,
 			"num_candidates": topK * 10, // oversample for better recall
 			"similarity":     threshold, // minimum score filter
+			"filter": map[string]any{
+				"bool": map[string]any{
+					"must_not": []map[string]any{
+						{
+							"term": map[string]any{
+								"branch_id": strconv.FormatInt(branchId, 10),
+							},
+						},
+					},
+				},
+			},
 		},
-		"_source": []string{"product_id", "name", "country", "image_url"},
+		"_source": []string{"product_id"},
 	}
 
 	body, _ := json.Marshal(query)
@@ -55,9 +99,6 @@ func (c *Client) FindSimilar(
 				Score  float64 `json:"_score"`
 				Source struct {
 					ProductID string `json:"product_id"`
-					Name      string `json:"name"`
-					Country   string `json:"country"`
-					ImageURL  string `json:"image_url"`
 				} `json:"_source"`
 			} `json:"hits"`
 		} `json:"hits"`

@@ -1,6 +1,8 @@
 package product
 
-import "time"
+import (
+	"time"
+)
 
 type MatchType string
 
@@ -14,8 +16,9 @@ const (
 type Match struct {
 	ID int64
 
-	ScrapedProductId   int64 `db:"scraped_product_id"`
-	CanonicalProductId int64 `db:"canonical_product_id"`
+	ScrapedProductId        int64 `db:"scraped_product_id"`
+	SimilarScrapedProductId int64 `db:"similar_scraped_product_id"`
+	CanonicalProductId      int64 `db:"canonical_product_id"`
 
 	MatchType       MatchType `db:"match_type"` // 'exact', 'fuzzy', 'manual', 'ml'
 	ConfidenceScore string    `db:"confidence_score"`
@@ -27,4 +30,13 @@ type Match struct {
 
 	CreatedAt  time.Time `db:"created_at"`
 	VerifiedAt time.Time `db:"verified_at"`
+}
+
+func NewMatch(pId, spId int64, cs string, mt MatchType) *Match {
+	return &Match{
+		ScrapedProductId:        pId,
+		SimilarScrapedProductId: spId,
+		ConfidenceScore:         cs,
+		MatchType:               mt,
+	}
 }
